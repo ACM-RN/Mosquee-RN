@@ -1,0 +1,856 @@
+:root {
+    /* Night Mode (Default) */
+    --bg-dark: #0f172a;
+    --bg-darker: #020617;
+    --primary-gold: #fbbf24;
+    --primary-orange: #d97706;
+    --text-white: #f8fafc;
+    --text-gray: #94a3b8;
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glow: 0 0 15px rgba(251, 191, 36, 0.3);
+    --card-bg: rgba(15, 23, 42, 0.6);
+}
+
+[data-theme="light"] {
+    --bg-dark: #f8fafc;
+    --bg-darker: #e2e8f0;
+    --primary-gold: #b45309;
+    /* Darker gold for contrast */
+    --primary-orange: #92400e;
+    --text-white: #0f172a;
+    --text-gray: #475569;
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --glow: 0 0 10px rgba(180, 83, 9, 0.2);
+    --card-bg: rgba(255, 255, 255, 0.9);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll while allowing vertical scrolling */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Backgrounds */
+.bg-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.03) 2px, transparent 2px),
+        radial-gradient(circle at 0% 0%, rgba(251, 191, 36, 0.1) 0%, transparent 50%);
+    background-size: 40px 40px, 100% 100%;
+    z-index: -2;
+}
+
+.bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 80% 90%, rgba(15, 23, 42, 0) 0%, var(--bg-darker) 100%);
+    z-index: -1;
+}
+
+/* Layout */
+.main-layout {
+    display: flex;
+    flex-wrap: wrap;
+    /* Allow wrapping on small screens */
+    flex: 1;
+    min-height: 100vh;
+    padding: 3rem 2rem 14rem 2rem;
+    /* Reduced from 6rem to move everything up */
+    gap: 2rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    /* Space out the 3 columns */
+}
+
+/* New Left Stats Column */
+.left-stats-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    /* Standardized balanced gap */
+    margin-top: 2rem;
+    min-width: 250px;
+}
+
+.pc-only {
+    display: flex !important;
+}
+
+.mobile-only {
+    display: none !important;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    border-left: 3px solid var(--primary-gold);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.stat-box .stat-label {
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+}
+
+.stat-box .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.text-gold {
+    color: var(--primary-gold);
+}
+
+.text-white {
+    color: var(--text-white);
+}
+
+/* Expenses Box (Place 3) */
+.fixed-expenses-box {
+    margin-top: 0;
+    /* Eliminated empty space */
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid var(--primary-gold);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.fixed-expenses-box .expense-icon {
+    font-size: 2rem;
+    color: var(--primary-gold);
+}
+
+.fixed-expenses-box .expense-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.fixed-expenses-box .label {
+    font-size: 0.8rem;
+    color: var(--primary-gold);
+    text-transform: uppercase;
+}
+
+.cents {
+    font-size: 0.65em;
+    opacity: 0.85;
+    margin-left: 2px;
+}
+
+.fixed-expenses-box .value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-white);
+}
+
+/* Professional Site QR Card */
+.site-visit-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--primary-gold) !important;
+    background: var(--card-bg) !important;
+    width: 100%;
+    min-width: 320px;
+}
+
+/* Share Panel */
+.share-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    border-radius: 12px;
+    margin-top: 0.5rem;
+    width: 100%;
+}
+
+.share-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--text-gray);
+    margin-bottom: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.share-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.share-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.share-btn.whatsapp {
+    background: #25d366;
+}
+
+.share-btn.facebook {
+    background: #1877f2;
+}
+
+.share-btn.copy {
+    background: var(--primary-gold);
+}
+
+.share-btn:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+}
+
+.site-visit-card .qr-box {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    display: block;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+}
+
+.site-visit-card .qr-box img,
+.site-visit-card .qr-box canvas {
+    max-width: 100%;
+}
+
+/* Hero Section (Left) */
+.hero-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    max-width: 600px;
+}
+
+/* Theme Toggle */
+.theme-toggle-container {
+    margin-bottom: 1rem;
+}
+
+#theme-toggle {
+    background: var(--glass-bg);
+    border: 1px solid var(--primary-gold);
+    color: var(--primary-gold);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+#theme-toggle:hover {
+    background: var(--primary-gold);
+    color: var(--bg-dark);
+}
+
+h1 {
+    font-family: 'Amiri', serif;
+    font-size: 2.5rem;
+    /* Reduced from 3.5rem to fit "Al Madinah Rouyn_Noranda" */
+    color: var(--primary-gold);
+    margin-bottom: 0.5rem;
+    text-shadow: var(--glow);
+    white-space: nowrap;
+    /* Force one line */
+}
+
+.title-location {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.loc-icon {
+    color: var(--primary-gold);
+    font-size: 1.2rem;
+}
+
+.loc-text {
+    color: var(--primary-gold);
+    font-size: 1.1rem;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--text-gray);
+    margin: 0;
+}
+
+.subtitle.thank-you {
+    margin-bottom: 3rem;
+    font-style: italic;
+}
+
+/* Progress Ring */
+.progress-ring-container {
+    position: relative;
+    width: 380px;
+    height: 380px;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-ring__circle {
+    transition: stroke-dashoffset 1.5s ease-in-out;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    stroke-linecap: round;
+    /* Base filter, will be overridden by animation */
+    filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5));
+    animation: pulse-gold 3s infinite ease-in-out;
+}
+
+@keyframes pulse-gold {
+    0% {
+        filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5));
+        stroke-width: 20;
+    }
+
+    50% {
+        filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.9));
+        stroke-width: 22;
+        /* Subtle thickness pulse */
+    }
+
+    100% {
+        filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5));
+        stroke-width: 20;
+    }
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.progress-text .amount {
+    font-size: 4.2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-white);
+    white-space: nowrap;
+    width: 100%;
+    text-align: center;
+}
+
+.progress-text .currency {
+    font-size: 1.8rem;
+    color: var(--primary-gold);
+    margin-bottom: 0.2rem;
+}
+
+.progress-text .goal-label {
+    font-size: 1.1rem;
+    color: var(--text-gray);
+    margin-top: 5px;
+}
+
+.progress-text .remaining-label {
+    font-size: 0.9rem;
+    color: var(--primary-orange);
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* Details Section (Right) */
+.details-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    /* Balanced gap between panels */
+    justify-content: flex-start;
+    max-width: 440px;
+    margin-top: 2rem;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-item.highlight {
+    grid-column: span 2;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-white);
+}
+
+
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 1.5rem;
+    /* Reduced from 2rem and 3rem */
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    width: 100%;
+}
+
+.card-icon {
+    font-size: 3rem;
+    color: var(--primary-gold);
+    margin-bottom: 1rem;
+    /* Reduced from 1.5rem */
+}
+
+.details-section h2 {
+    font-family: 'Amiri', serif;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    /* Reduced from 1rem */
+}
+
+.instruction {
+    color: var(--text-gray);
+    margin-bottom: 1.5rem;
+    /* Reduced from 2rem */
+}
+
+/* Transfer Container (Email + QR) */
+.transfer-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--primary-gold);
+    border-radius: 12px;
+    padding: 1rem;
+    /* Compact padding */
+    margin-bottom: 1.5rem;
+    /* Reduced from 2rem */
+    gap: 1rem;
+}
+
+.email-details {
+    flex: 1;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+    padding-right: 1rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.email-details:hover .email-value {
+    color: var(--text-white);
+}
+
+.email-details .label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    margin-bottom: 0.2rem;
+}
+
+.email-value {
+    font-size: 1.0rem;
+    /* Slightly smaller to fit */
+    font-weight: 700;
+    color: var(--primary-gold);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    word-break: normal;
+    white-space: nowrap;
+    /* Forces text to stay on one line */
+}
+
+.click-hint {
+    font-size: 0.7rem;
+    color: var(--text-gray);
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+.qr-section {
+    flex-shrink: 0;
+}
+
+#qrcode {
+    background: white;
+    padding: 5px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#qrcode img {
+    display: block;
+    /* Remove default inline spacing */
+}
+
+.blessing-box {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.5rem;
+}
+
+.arabic-text {
+    font-family: 'Amiri', serif;
+    font-size: 1.5rem;
+    color: var(--text-white);
+    margin-bottom: 0.5rem;
+}
+
+.translation {
+    font-size: 0.9rem;
+    color: var(--text-gray);
+    font-style: italic;
+}
+
+.tooltip {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-gold);
+    color: var(--bg-dark);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip.show {
+    opacity: 1;
+}
+
+/* Marquee Footer */
+.marquee-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(90deg, var(--bg-dark) 0%, rgba(251, 191, 36, 0.1) 50%, var(--bg-dark) 100%);
+    padding: 1rem 0;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.marquee-content {
+    white-space: nowrap;
+    animation: scroll 30s linear infinite;
+}
+
+.marquee-content p {
+    display: inline-block;
+    font-family: 'Amiri', serif;
+    font-size: 2rem;
+    /* Increased from 1.2rem or 1.4rem */
+    font-weight: 700;
+    /* Bolder for clarity */
+    letter-spacing: 1px;
+    /* More spaced out */
+    color: var(--primary-gold);
+    /* Gold color for better visibility against dark bg? Or stick to gray? User said clearer. Gold might be better. Let's try brighter gray or gold. */
+    padding-right: 100%;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+
+    /* Left to Right */
+}
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(2, 6, 23, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.5s;
+}
+
+.overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.verse-container {
+    text-align: center;
+}
+
+.verse-icon {
+    font-size: 4rem;
+    color: var(--primary-gold);
+    margin-bottom: 2rem;
+}
+
+.arabic-verse {
+    font-family: 'Amiri', serif;
+    font-size: 2.5rem;
+    color: var(--text-white);
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+}
+
+.french-verse {
+    font-size: 1.2rem;
+    color: var(--text-gray);
+    margin-bottom: 1rem;
+}
+
+.surah-ref {
+    color: var(--primary-gold);
+}
+
+.close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: var(--text-gray);
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+/* Responsive & TV Optimization */
+@media (max-width: 900px) {
+    .pc-only {
+        display: none !important;
+    }
+
+    .mobile-only {
+        display: flex !important;
+    }
+
+    html,
+    body {
+        overflow-y: auto !important;
+        height: auto !important;
+    }
+
+    .main-layout {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: auto;
+        padding: 1rem 1rem 12rem 1rem;
+        /* Reduced from 2rem to move title up */
+        gap: 1.5rem;
+        /* Minimized horizontal/vertical gap */
+        min-height: auto;
+    }
+
+    /* REORDERING FOR MOBILE: 3 elements after circle */
+    .hero-section {
+        order: 1 !important;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .left-stats-column {
+        display: contents;
+        /* Allow children to be reordered globally */
+    }
+
+    .goal-box {
+        order: 2 !important;
+        width: 100%;
+        max-width: 380px;
+    }
+
+    .remaining-box {
+        order: 3 !important;
+        width: 100%;
+        max-width: 380px;
+    }
+
+    .fixed-expenses-box {
+        order: 4 !important;
+        width: 100%;
+        max-width: 380px;
+    }
+
+    .details-section {
+        order: 5 !important;
+        margin-top: 1rem;
+        width: 100%;
+        align-items: center;
+    }
+
+    .site-visit-card {
+        order: 6 !important;
+        width: 100%;
+        max-width: 380px;
+        margin-top: 1rem !important;
+    }
+
+    .share-panel {
+        order: 7 !important;
+        width: 100%;
+        max-width: 380px;
+    }
+
+    .details-section h2 {
+        font-size: 1.5rem !important;
+        white-space: nowrap !important;
+        /* Single Line Level */
+        width: 100%;
+        text-align: center;
+    }
+
+    /* TYPOGRAPHY */
+    h1 {
+        font-size: 1.8rem !important;
+        white-space: normal;
+        margin-bottom: 0.5rem;
+    }
+
+    /* PROGRESS RING FIX */
+    .progress-ring-container {
+        width: 300px;
+        height: 300px;
+        margin: 1.5rem auto;
+    }
+
+    .progress-ring {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .progress-ring circle {
+        stroke-width: 20;
+    }
+
+    .progress-text .amount {
+        font-size: 3.2rem;
+    }
+
+    .stat-box {
+        width: 100%;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(251, 191, 36, 0.2);
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 12px;
+    }
+
+    .marquee-footer {
+        padding: 0.5rem 0;
+        height: 3.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .marquee-content p {
+        font-size: 1.1rem;
+    }
+}
+
+@media (min-width: 1920px) {
+    html {
+        font-size: 24px;
+    }
+
+    .progress-ring-container {
+        width: 500px;
+        height: 500px;
+    }
+
+    .progress-ring {
+        width: 500px;
+        height: 500px;
+    }
+
+    .progress-ring circle {
+        cx: 250;
+        cy: 250;
+        r: 210;
+    }
+
+    .main-layout {
+        gap: 5rem;
+    }
+}
