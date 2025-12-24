@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const siteQR = document.getElementById("site-qrcode");
         if (siteQR) {
             new QRCode(siteQR, {
-                text: "https://abdenourhe.github.io/Al_Madinah-RN/",
+                text: "https://acm-rn.github.io/Mosquee-RN/",
                 width: 100,
                 height: 100,
                 colorDark: "#0f172a",
@@ -184,7 +184,7 @@ function updateThemeIcon(theme) {
 
 /* Sharing Functions */
 function getShareText() {
-    return encodeURIComponent("Faites un don pour la Mosquée de Rouyn-Noranda : https://abdenourhe.github.io/Al_Madinah-RN/");
+    return encodeURIComponent("Faites un don pour la Mosquée de Rouyn-Noranda : https://acm-rn.github.io/Mosquee-RN/");
 }
 
 function shareWhatsApp() {
