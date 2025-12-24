@@ -751,6 +751,10 @@ h1 {
         order: 4 !important;
         width: 100%;
         max-width: 380px;
+        justify-content: center !important;
+        /* Centering for mobile */
+        gap: 2.5rem !important;
+        /* Spacing between icon and writing */
     }
 
     .details-section {
