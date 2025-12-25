@@ -27,33 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return result.map(v => v.replace(/^"(.*)"$/, '$1').trim());
     }
 
-    function updateLastUpdateDisplay() {
-        const lastUpdateEl = document.getElementById('last-update');
-        if (!lastUpdateEl) return;
-
-        try {
-            const hh = String(lastChangeTime.getHours()).padStart(2, '0');
-            const mm = String(lastChangeTime.getMinutes()).padStart(2, '0');
-            const timeStr = `${hh}:${mm}`;
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            const dateStr = lastChangeTime.toLocaleDateString('fr-FR', options);
-
-            lastUpdateEl.innerHTML = `<span class="sync-dot"></span> Dernière mise à jour : ${dateStr} à ${timeStr}`;
-            lastUpdateEl.style.display = 'flex';
-            lastUpdateEl.style.visibility = 'visible';
-            lastUpdateEl.style.justifyContent = 'center';
-            lastUpdateEl.style.alignItems = 'center';
-            lastUpdateEl.style.gap = '8px';
-        } catch (e) {
-            console.error("Display update error:", e);
-        }
-    }
-
     function fetchData() {
-        console.log("Syncing with Google...");
-        const lastUpdateEl = document.getElementById('last-update');
-        if (lastUpdateEl) lastUpdateEl.classList.add('syncing');
-
+        console.log("Fetching live data...");
         // Cache busting + no-store to ensure the absolute latest data
         const syncUrl = SHEET_CSV_URL + '&t=' + Date.now();
 
@@ -65,7 +40,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (lines.length === 0) return;
                 const rows = lines.map(line => parseCSVLine(line));
 
-                if (lastUpdateEl) lastUpdateEl.classList.remove('syncing');
+                // Dynamically find column indices
+                const headers = rows[0].map(h => h.toLowerCase());
+                const montantIdx = headers.findIndex(h => h.includes('montant')) !== -1 ? headers.findIndex(h => h.includes('montant')) : 1;
+                const goalIdx = headers.findIndex(h => h.includes('objectif')) !== -1 ? headers.findIndex(h => h.includes('objectif')) : 2;
+                const expenseIdx = headers.findIndex(h => h.includes('dépense')) !== -1 ? headers.findIndex(h => h.includes('dépense')) : 3;
+                const dateIdx = headers.findIndex(h => h.toLowerCase().includes('date') || h.toLowerCase().includes('mise')) !== -1 ? headers.findIndex(h => h.toLowerCase().includes('date') || h.toLowerCase().includes('mise')) : -1;
+
+                let lastUpdateValue = "";
+
+                let totalCollected = 0;
+                let goalAmount = 50000;
+                let fixedExpenses = "4 000 $";
+
+                if (rows.length > 1) {
+                    // Goal & Expenses from the first DATA row
+                    if (rows[1][goalIdx]) goalAmount = cleanAmount(rows[1][goalIdx]) || 50000;
+                    if (rows[1][expenseIdx]) fixedExpenses = rows[1][expenseIdx];
+
+                    // Sum Column 'montant'
+                    for (let i = 1; i < rows.length; i++) {
+                        if (rows[i][montantIdx]) {
+                            totalCollected += cleanAmount(rows[i][montantIdx]);
+                        }
+                        // Track potentially latest date
+                        if (dateIdx !== -1 && rows[i][dateIdx]) {
+                            lastUpdateValue = rows[i][dateIdx];
+                        }
+                    }
+                }
 
                 // Compare normalized content to detect real changes
                 const normalizedCurrent = csvText.trim().replace(/\r\n/g, '\n');
@@ -81,7 +84,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastCsvContent = csvText;
                 localStorage.setItem('lastCsvContent', lastCsvContent);
 
-                updateLastUpdateDisplay();
+                // Date & Time Formatting (Strictly System Time of Last Detected Change)
+                let displayDate = "";
+                try {
+                    const updateDate = lastChangeTime;
+                    const hh = String(updateDate.getHours()).padStart(2, '0');
+                    const mm = String(updateDate.getMinutes()).padStart(2, '0');
+                    const timeStr = `${hh}:${mm}`;
+
+                    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                    const dateStr = updateDate.toLocaleDateString('fr-FR', options);
+
+                    displayDate = `Dernière mise à jour : ${dateStr} à ${timeStr}`;
+                } catch (e) {
+                    console.error("Date formatting error:", e);
+                    displayDate = "Données actualisées";
+                }
+
+                const lastUpdateEl = document.getElementById('last-update');
+                if (lastUpdateEl) {
+                    lastUpdateEl.innerHTML = `<span>${displayDate}</span>`;
+                    lastUpdateEl.style.display = 'block';
+                    lastUpdateEl.style.visibility = 'visible';
+                }
 
                 const remaining = Math.max(0, goalAmount - totalCollected);
                 const percentage = Math.min(100, (totalCollected / goalAmount) * 100);
