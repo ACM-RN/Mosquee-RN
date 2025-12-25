@@ -268,7 +268,10 @@ body {
 
 /* Theme Toggle */
 .theme-toggle-container {
-    margin-bottom: 1rem;
+    position: fixed;     /* Fixe le bouton sur l'écran */
+    top: 20px;           /* Distance du haut */
+    right: 20px;         /* Distance de la droite */
+    z-index: 1000;       /* Pour qu'il soit au-dessus de tout */
 }
 
 #theme-toggle {
@@ -1071,3 +1074,4 @@ h1 {
     }
 
 }
+
