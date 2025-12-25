@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Google Sheet URL (CSV Format)
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1QPeJW0LbygqAyXF2Nhsu5fkRosaPrwK-JgP9L00o7hs/export?format=csv';
 
-    let lastCsvContent = "";
-    let lastChangeTime = new Date();
+    let lastCsvContent = localStorage.getItem('lastCsvContent') || "";
+    let lastChangeTime = localStorage.getItem('lastChangeTime') ? new Date(localStorage.getItem('lastChangeTime')) : new Date();
 
     function fetchData() {
         console.log("Fetching live data...");
@@ -70,11 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (lastCsvContent !== "" && lastCsvContent !== csvText) {
                     lastChangeTime = new Date();
+                    localStorage.setItem('lastChangeTime', lastChangeTime.toISOString());
                     console.log("Data change detected!");
                 }
                 lastCsvContent = csvText;
+                localStorage.setItem('lastCsvContent', lastCsvContent);
 
-                // Date & Time Formatting
+                // Date & Time Formatting (System Time ONLY)
                 let displayDate = "";
                 try {
                     const updateDate = lastChangeTime;
@@ -85,14 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const options = { day: 'numeric', month: 'long', year: 'numeric' };
                     const dateStr = updateDate.toLocaleDateString('fr-FR', options);
 
-                    // Clean the value from the sheet to prevent hidden characters
-                    const sheetDateValue = (lastUpdateValue || "").replace(/[\r\n]/g, "").trim();
-
-                    if (sheetDateValue.length > 0) {
-                        displayDate = "Dernière mise à jour : " + sheetDateValue + " à " + timeStr;
-                    } else {
-                        displayDate = "Dernière actualisation : " + dateStr + " à " + timeStr;
-                    }
+                    displayDate = `Dernière mise à jour : ${dateStr} à ${timeStr}`;
                 } catch (e) {
                     console.error("Date formatting error:", e);
                     displayDate = "Données actualisées";
