@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Google Sheet URL (CSV Format)
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1QPeJW0LbygqAyXF2Nhsu5fkRosaPrwK-JgP9L00o7hs/export?format=csv';
 
-    let lastCsvContent = localStorage.getItem('lastCsvContent') || "";
+    let lastDataSnapshot = localStorage.getItem('lastDataSnapshot') || "";
     let lastChangeTimeStr = localStorage.getItem('lastChangeTime');
     let lastChangeTime = lastChangeTimeStr ? new Date(lastChangeTimeStr) : new Date();
 
@@ -100,33 +100,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Compare normalized content to detect real changes
-                const normalizedCurrent = csvText.trim().replace(/\r\n/g, '\n');
-                const normalizedLast = lastCsvContent.trim().replace(/\r\n/g, '\n');
+                // Compare value snapshots to detect real financial changes
+                const currentSnapshot = `${totalCollected.toFixed(2)}-${goalAmount}-${fixedExpenses}`;
 
-                if (normalizedLast === "") {
-                    // First load ever: set baseline
-                    lastCsvContent = csvText;
-                    localStorage.setItem('lastCsvContent', lastCsvContent);
+                if (lastDataSnapshot === "") {
+                    // First load: set baseline without updating time
+                    lastDataSnapshot = currentSnapshot;
+                    localStorage.setItem('lastDataSnapshot', lastDataSnapshot);
                     if (!lastChangeTimeStr) {
                         localStorage.setItem('lastChangeTime', lastChangeTime.toISOString());
                     }
-                } else if (normalizedLast !== normalizedCurrent) {
-                    // Data actually changed!
+                } else if (lastDataSnapshot !== currentSnapshot) {
+                    // Data values actually changed!
                     lastChangeTime = new Date();
                     localStorage.setItem('lastChangeTime', lastChangeTime.toISOString());
-                    lastCsvContent = csvText;
-                    localStorage.setItem('lastCsvContent', lastCsvContent);
-                    console.log("Data change detected! Updating timestamp.");
+                    lastDataSnapshot = currentSnapshot;
+                    localStorage.setItem('lastDataSnapshot', lastDataSnapshot);
+                    console.log("Financial change detected! Updating timestamp.");
 
                     // Trigger celebration if total increased
                     if (totalCollected > prevTotal + 0.01) {
                         triggerCelebration();
                     }
-                    prevTotal = totalCollected;
-                    localStorage.setItem('lastTotal', totalCollected);
-                } else if (prevTotal === 0 && totalCollected > 0) {
-                    // Initialize first total without celebrating
                     prevTotal = totalCollected;
                     localStorage.setItem('lastTotal', totalCollected);
                 }
@@ -384,8 +379,8 @@ function createHeart(container) {
     setTimeout(() => heart.remove(), 3000);
 }
 
-// Initial call to set interval (2 minutes)
-setInterval(showOverlay, 120000);
+// Initial call to set interval (1 minute)
+setInterval(showOverlay, 60000);
 
 // For testing:
 // setTimeout(triggerCelebration, 3000);
