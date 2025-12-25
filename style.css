@@ -335,10 +335,20 @@ h1 {
     position: relative;
     width: 380px;
     height: 380px;
-    margin-bottom: 2rem;
+    margin-bottom: 0.5rem;
+    /* Reduced to give space to date */
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.last-update {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+    margin-bottom: 2rem;
+    font-style: italic;
+    text-align: center;
+    width: 100%;
 }
 
 .progress-ring__circle {

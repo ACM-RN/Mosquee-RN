@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const montantIdx = headers.findIndex(h => h.includes('montant')) !== -1 ? headers.findIndex(h => h.includes('montant')) : 1;
                 const goalIdx = headers.findIndex(h => h.includes('objectif')) !== -1 ? headers.findIndex(h => h.includes('objectif')) : 2;
                 const expenseIdx = headers.findIndex(h => h.includes('dépense')) !== -1 ? headers.findIndex(h => h.includes('dépense')) : 3;
+                const dateIdx = headers.findIndex(h => h.includes('date')) !== -1 ? headers.findIndex(h => h.includes('date')) : -1;
+
+                let lastUpdateValue = "";
 
                 let totalCollected = 0;
                 let goalAmount = 50000;
@@ -55,8 +58,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (rows[i][montantIdx]) {
                             totalCollected += cleanAmount(rows[i][montantIdx]);
                         }
+                        // Track potentially latest date
+                        if (dateIdx !== -1 && rows[i][dateIdx]) {
+                            lastUpdateValue = rows[i][dateIdx];
+                        }
                     }
                 }
+
+                // Date Formatting
+                let displayDate = "";
+                if (lastUpdateValue) {
+                    displayDate = "Dernière mise à jour : " + lastUpdateValue;
+                } else {
+                    const now = new Date();
+                    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                    displayDate = "Dernière actualisation : " + now.toLocaleDateString('fr-FR', options);
+                }
+
+                const lastUpdateEl = document.getElementById('last-update');
+                if (lastUpdateEl) lastUpdateEl.textContent = displayDate;
 
                 const remaining = Math.max(0, goalAmount - totalCollected);
                 const percentage = Math.min(100, (totalCollected / goalAmount) * 100);
