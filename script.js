@@ -3,8 +3,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1QPeJW0LbygqAyXF2Nhsu5fkRosaPrwK-JgP9L00o7hs/export?format=csv';
 
     let lastCsvContent = localStorage.getItem('lastCsvContent') || "";
-    // lastChangeTime remains as the persistent timestamp of the last detected change
-    let lastChangeTime = localStorage.getItem('lastChangeTime') ? new Date(localStorage.getItem('lastChangeTime')) : new Date();
+    let lastChangeTimeStr = localStorage.getItem('lastChangeTime');
+    let lastChangeTime = lastChangeTimeStr ? new Date(lastChangeTimeStr) : new Date();
+
+    function updateLastUpdateDisplay() {
+        const lastUpdateEl = document.getElementById('last-update');
+        if (!lastUpdateEl) return;
+
+        try {
+            const hh = String(lastChangeTime.getHours()).padStart(2, '0');
+            const mm = String(lastChangeTime.getMinutes()).padStart(2, '0');
+            const timeStr = `${hh}:${mm}`;
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const dateStr = lastChangeTime.toLocaleDateString('fr-FR', options);
+
+            lastUpdateEl.innerHTML = `<span class="sync-dot"></span> Dernière mise à jour : ${dateStr} à ${timeStr}`;
+            lastUpdateEl.style.display = 'flex';
+            lastUpdateEl.style.visibility = 'visible';
+            lastUpdateEl.style.justifyContent = 'center';
+            lastUpdateEl.style.alignItems = 'center';
+            lastUpdateEl.style.gap = '8px';
+        } catch (e) {
+            console.error("Display update error:", e);
+        }
+    }
 
     function cleanAmount(str) {
         if (!str) return 0;
@@ -28,7 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function fetchData() {
-        console.log("Fetching live data...");
+        console.log("Checking for updates...");
+        const lastUpdateEl = document.getElementById('last-update');
+        if (lastUpdateEl) lastUpdateEl.classList.add('syncing');
+
         // Cache busting + no-store to ensure the absolute latest data
         const syncUrl = SHEET_CSV_URL + '&t=' + Date.now();
 
@@ -36,6 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(syncUrl, { cache: 'no-store' })
             .then(response => response.text())
             .then(csvText => {
+                if (lastUpdateEl) lastUpdateEl.classList.remove('syncing');
+
                 const lines = csvText.split(/\r?\n/).filter(l => l.trim().length > 0);
                 if (lines.length === 0) return;
                 const rows = lines.map(line => parseCSVLine(line));
@@ -74,39 +101,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const normalizedCurrent = csvText.trim().replace(/\r\n/g, '\n');
                 const normalizedLast = lastCsvContent.trim().replace(/\r\n/g, '\n');
 
-                if (normalizedLast !== "" && normalizedLast !== normalizedCurrent) {
+                if (normalizedLast === "") {
+                    // First load ever: set baseline
+                    lastCsvContent = csvText;
+                    localStorage.setItem('lastCsvContent', lastCsvContent);
+                    if (!lastChangeTimeStr) {
+                        localStorage.setItem('lastChangeTime', lastChangeTime.toISOString());
+                    }
+                } else if (normalizedLast !== normalizedCurrent) {
+                    // Data actually changed!
                     lastChangeTime = new Date();
                     localStorage.setItem('lastChangeTime', lastChangeTime.toISOString());
-                    console.log("Data change detected!");
+                    lastCsvContent = csvText;
+                    localStorage.setItem('lastCsvContent', lastCsvContent);
+                    console.log("Data change detected! Updating timestamp.");
                 }
 
-                // Always sync the content to storage for next comparison
-                lastCsvContent = csvText;
-                localStorage.setItem('lastCsvContent', lastCsvContent);
-
-                // Date & Time Formatting (Strictly System Time of Last Detected Change)
-                let displayDate = "";
-                try {
-                    const updateDate = lastChangeTime;
-                    const hh = String(updateDate.getHours()).padStart(2, '0');
-                    const mm = String(updateDate.getMinutes()).padStart(2, '0');
-                    const timeStr = `${hh}:${mm}`;
-
-                    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-                    const dateStr = updateDate.toLocaleDateString('fr-FR', options);
-
-                    displayDate = `Dernière mise à jour : ${dateStr} à ${timeStr}`;
-                } catch (e) {
-                    console.error("Date formatting error:", e);
-                    displayDate = "Données actualisées";
-                }
-
-                const lastUpdateEl = document.getElementById('last-update');
-                if (lastUpdateEl) {
-                    lastUpdateEl.innerHTML = `<span>${displayDate}</span>`;
-                    lastUpdateEl.style.display = 'block';
-                    lastUpdateEl.style.visibility = 'visible';
-                }
+                updateLastUpdateDisplay();
 
                 const remaining = Math.max(0, goalAmount - totalCollected);
                 const percentage = Math.min(100, (totalCollected / goalAmount) * 100);
