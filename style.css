@@ -477,7 +477,7 @@ h1 {
     /* Balanced gap between panels */
     justify-content: flex-start;
     max-width: 440px;
-    margin-top: 2rem;
+    margin-top: 5rem;
 }
 
 .stat-item {
@@ -1069,4 +1069,5 @@ h1 {
         width: 250px;
         height: 250px;
     }
+
 }
