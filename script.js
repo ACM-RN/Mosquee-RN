@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastChangeTimeStr = localStorage.getItem('lastChangeTime');
     let lastChangeTime = lastChangeTimeStr ? new Date(lastChangeTimeStr) : new Date();
 
+    // Track previous total for celebration
+    let prevTotal = parseFloat(localStorage.getItem('lastTotal')) || 0;
+
     function updateLastUpdateDisplay() {
         const lastUpdateEl = document.getElementById('last-update');
         if (!lastUpdateEl) return;
@@ -115,6 +118,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     lastCsvContent = csvText;
                     localStorage.setItem('lastCsvContent', lastCsvContent);
                     console.log("Data change detected! Updating timestamp.");
+
+                    // Trigger celebration if total increased
+                    if (totalCollected > prevTotal + 0.01) {
+                        triggerCelebration();
+                    }
+                    prevTotal = totalCollected;
+                    localStorage.setItem('lastTotal', totalCollected);
+                } else if (prevTotal === 0 && totalCollected > 0) {
+                    // Initialize first total without celebrating
+                    prevTotal = totalCollected;
+                    localStorage.setItem('lastTotal', totalCollected);
                 }
 
                 updateLastUpdateDisplay();
@@ -158,7 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => console.error('Error fetching data:', error));
     }
 
-    // Initial fetch
+    // Initial display and fetch
+    updateLastUpdateDisplay();
     fetchData();
 
     // Auto-sync every 10 seconds (reduced for faster detection)
@@ -336,8 +351,42 @@ function closeOverlay() {
     overlay.classList.add('hidden');
 }
 
+// Celebration Logic
+function triggerCelebration() {
+    const overlay = document.getElementById('celebration-overlay');
+    const heartsContainer = document.querySelector('.celebration-hearts');
+    if (!overlay || !heartsContainer) return;
+
+    overlay.classList.add('active');
+    overlay.classList.remove('hidden');
+
+    // Create many hearts
+    for (let i = 0; i < 40; i++) {
+        setTimeout(() => createHeart(heartsContainer), i * 50);
+    }
+
+    // Hide after 6 seconds
+    setTimeout(() => {
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.classList.add('hidden'), 500);
+    }, 6000);
+}
+
+function createHeart(container) {
+    const heart = document.createElement('i');
+    heart.className = 'fa-solid fa-heart heart-particle';
+    heart.style.left = Math.random() * 100 + '%';
+    heart.style.top = Math.random() * 100 + '%';
+    heart.style.animationDelay = Math.random() * 0.5 + 's';
+    heart.style.color = `hsl(${Math.random() * 20 + 350}, 80%, 60%)`; // Shades of red/pink
+
+    container.appendChild(heart);
+    setTimeout(() => heart.remove(), 3000);
+}
+
 // Initial call to set interval (2 minutes)
 setInterval(showOverlay, 120000);
 
-// Uncomment to test popup immediately
-// setTimeout(showOverlay, 3000);
+// For testing:
+// setTimeout(triggerCelebration, 3000);
+
