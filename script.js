@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const montantIdx = headers.findIndex(h => h.includes('montant')) !== -1 ? headers.findIndex(h => h.includes('montant')) : 1;
                 const goalIdx = headers.findIndex(h => h.includes('objectif')) !== -1 ? headers.findIndex(h => h.includes('objectif')) : 2;
                 const expenseIdx = headers.findIndex(h => h.includes('dépense')) !== -1 ? headers.findIndex(h => h.includes('dépense')) : 3;
-                const dateIdx = headers.findIndex(h => h.includes('date')) !== -1 ? headers.findIndex(h => h.includes('date')) : -1;
+                const dateIdx = headers.findIndex(h => h.toLowerCase().includes('date') || h.toLowerCase().includes('mise')) !== -1 ? headers.findIndex(h => h.toLowerCase().includes('date') || h.toLowerCase().includes('mise')) : -1;
 
                 let lastUpdateValue = "";
 
@@ -65,18 +65,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Date Formatting
+                // Date & Time Formatting
                 let displayDate = "";
-                if (lastUpdateValue) {
-                    displayDate = "Dernière mise à jour : " + lastUpdateValue;
+                const now = new Date();
+                const hh = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                const timeStr = hh + ":" + mm;
+
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                const dateStr = now.toLocaleDateString('fr-FR', options);
+
+                if (lastUpdateValue && lastUpdateValue.trim().length > 0) {
+                    displayDate = "Dernière mise à jour : " + lastUpdateValue + " à " + timeStr;
                 } else {
-                    const now = new Date();
-                    const options = { day: 'numeric', month: 'long', year: 'numeric' };
-                    displayDate = "Dernière actualisation : " + now.toLocaleDateString('fr-FR', options);
+                    displayDate = "Dernière actualisation : " + dateStr + " à " + timeStr;
                 }
 
                 const lastUpdateEl = document.getElementById('last-update');
-                if (lastUpdateEl) lastUpdateEl.textContent = displayDate;
+                if (lastUpdateEl) {
+                    lastUpdateEl.innerHTML = `<span>${displayDate}</span>`;
+                    lastUpdateEl.style.setProperty('display', 'block', 'important');
+                    lastUpdateEl.style.setProperty('visibility', 'visible', 'important');
+                    lastUpdateEl.style.setProperty('opacity', '1', 'important');
+                }
 
                 const remaining = Math.max(0, goalAmount - totalCollected);
                 const percentage = Math.min(100, (totalCollected / goalAmount) * 100);
