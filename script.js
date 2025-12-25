@@ -67,26 +67,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Date & Time Formatting
                 let displayDate = "";
-                const now = new Date();
-                const hh = String(now.getHours()).padStart(2, '0');
-                const mm = String(now.getMinutes()).padStart(2, '0');
-                const timeStr = hh + ":" + mm;
+                try {
+                    const now = new Date();
+                    const hh = String(now.getHours()).padStart(2, '0');
+                    const mm = String(now.getMinutes()).padStart(2, '0');
+                    const timeStr = `${hh}:${mm}`;
 
-                const options = { day: 'numeric', month: 'long', year: 'numeric' };
-                const dateStr = now.toLocaleDateString('fr-FR', options);
+                    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                    const dateStr = now.toLocaleDateString('fr-FR', options);
 
-                if (lastUpdateValue && lastUpdateValue.trim().length > 0) {
-                    displayDate = "Dernière mise à jour : " + lastUpdateValue + " à " + timeStr;
-                } else {
-                    displayDate = "Dernière actualisation : " + dateStr + " à " + timeStr;
+                    // Clean the value from the sheet to prevent hidden characters
+                    const cleanDateValue = (lastUpdateValue || "").replace(/[\r\n]/g, "").trim();
+
+                    if (cleanDateValue.length > 0) {
+                        displayDate = "Dernière mise à jour : " + cleanDateValue + " à " + timeStr;
+                    } else {
+                        displayDate = "Dernière actualisation : " + dateStr + " à " + timeStr;
+                    }
+                } catch (e) {
+                    console.error("Date formatting error:", e);
+                    displayDate = "Données actualisées";
                 }
 
                 const lastUpdateEl = document.getElementById('last-update');
                 if (lastUpdateEl) {
                     lastUpdateEl.innerHTML = `<span>${displayDate}</span>`;
-                    lastUpdateEl.style.setProperty('display', 'block', 'important');
-                    lastUpdateEl.style.setProperty('visibility', 'visible', 'important');
-                    lastUpdateEl.style.setProperty('opacity', '1', 'important');
+                    lastUpdateEl.style.display = 'block';
+                    lastUpdateEl.style.visibility = 'visible';
                 }
 
                 const remaining = Math.max(0, goalAmount - totalCollected);
