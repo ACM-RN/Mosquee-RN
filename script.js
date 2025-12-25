@@ -3,35 +3,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1QPeJW0LbygqAyXF2Nhsu5fkRosaPrwK-JgP9L00o7hs/export?format=csv';
 
     let lastCsvContent = localStorage.getItem('lastCsvContent') || "";
+    // lastChangeTime remains as the persistent timestamp of the last detected change
     let lastChangeTime = localStorage.getItem('lastChangeTime') ? new Date(localStorage.getItem('lastChangeTime')) : new Date();
+
+    function cleanAmount(str) {
+        if (!str) return 0;
+        // Aggressive clean: keep only digits and the LAST decimal separator
+        let cleaned = str.replace(/[^0-9,.]/g, '').replace(',', '.');
+        return parseFloat(cleaned) || 0;
+    }
+
+    function parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        const sep = line.includes(';') ? ';' : ',';
+        for (let i = 0; i < line.length; i++) {
+            if (line[i] === '"') inQuotes = !inQuotes;
+            else if (line[i] === sep && !inQuotes) { result.push(current.trim()); current = ''; }
+            else current += line[i];
+        }
+        result.push(current.trim());
+        return result.map(v => v.replace(/^"(.*)"$/, '$1').trim());
+    }
 
     function fetchData() {
         console.log("Fetching live data...");
-        // Cache busting to ensure we get the latest data
+        // Cache busting + no-store to ensure the absolute latest data
         const syncUrl = SHEET_CSV_URL + '&t=' + Date.now();
 
-        function cleanAmount(str) {
-            if (!str) return 0;
-            // Aggressive clean: keep only digits and the LAST decimal separator
-            let cleaned = str.replace(/[^0-9,.]/g, '').replace(',', '.');
-            return parseFloat(cleaned) || 0;
-        }
-
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            const sep = line.includes(';') ? ';' : ',';
-            for (let i = 0; i < line.length; i++) {
-                if (line[i] === '"') inQuotes = !inQuotes;
-                else if (line[i] === sep && !inQuotes) { result.push(current.trim()); current = ''; }
-                else current += line[i];
-            }
-            result.push(current.trim());
-            return result.map(v => v.replace(/^"(.*)"$/, '$1').trim());
-        }
-
-        fetch(syncUrl)
+        // Use no-store to bypass any proxy or browser cache
+        fetch(syncUrl, { cache: 'no-store' })
             .then(response => response.text())
             .then(csvText => {
                 const lines = csvText.split(/\r?\n/).filter(l => l.trim().length > 0);
@@ -68,15 +70,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                if (lastCsvContent !== "" && lastCsvContent !== csvText) {
+                // Compare normalized content to detect real changes
+                const normalizedCurrent = csvText.trim().replace(/\r\n/g, '\n');
+                const normalizedLast = lastCsvContent.trim().replace(/\r\n/g, '\n');
+
+                if (normalizedLast !== "" && normalizedLast !== normalizedCurrent) {
                     lastChangeTime = new Date();
                     localStorage.setItem('lastChangeTime', lastChangeTime.toISOString());
                     console.log("Data change detected!");
                 }
+
+                // Always sync the content to storage for next comparison
                 lastCsvContent = csvText;
                 localStorage.setItem('lastCsvContent', lastCsvContent);
 
-                // Date & Time Formatting (System Time ONLY)
+                // Date & Time Formatting (Strictly System Time of Last Detected Change)
                 let displayDate = "";
                 try {
                     const updateDate = lastChangeTime;
