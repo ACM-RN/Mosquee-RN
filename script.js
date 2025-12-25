@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Google Sheet URL (CSV Format)
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1QPeJW0LbygqAyXF2Nhsu5fkRosaPrwK-JgP9L00o7hs/export?format=csv';
 
+    let lastCsvContent = "";
+    let lastChangeTime = new Date();
+
     function fetchData() {
         console.log("Fetching live data...");
         // Cache busting to ensure we get the latest data
@@ -65,22 +68,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
+                if (lastCsvContent !== "" && lastCsvContent !== csvText) {
+                    lastChangeTime = new Date();
+                    console.log("Data change detected!");
+                }
+                lastCsvContent = csvText;
+
                 // Date & Time Formatting
                 let displayDate = "";
                 try {
-                    const now = new Date();
-                    const hh = String(now.getHours()).padStart(2, '0');
-                    const mm = String(now.getMinutes()).padStart(2, '0');
+                    const updateDate = lastChangeTime;
+                    const hh = String(updateDate.getHours()).padStart(2, '0');
+                    const mm = String(updateDate.getMinutes()).padStart(2, '0');
                     const timeStr = `${hh}:${mm}`;
 
                     const options = { day: 'numeric', month: 'long', year: 'numeric' };
-                    const dateStr = now.toLocaleDateString('fr-FR', options);
+                    const dateStr = updateDate.toLocaleDateString('fr-FR', options);
 
                     // Clean the value from the sheet to prevent hidden characters
-                    const cleanDateValue = (lastUpdateValue || "").replace(/[\r\n]/g, "").trim();
+                    const sheetDateValue = (lastUpdateValue || "").replace(/[\r\n]/g, "").trim();
 
-                    if (cleanDateValue.length > 0) {
-                        displayDate = "Dernière mise à jour : " + cleanDateValue + " à " + timeStr;
+                    if (sheetDateValue.length > 0) {
+                        displayDate = "Dernière mise à jour : " + sheetDateValue + " à " + timeStr;
                     } else {
                         displayDate = "Dernière actualisation : " + dateStr + " à " + timeStr;
                     }
@@ -138,8 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial fetch
     fetchData();
 
-    // Auto-sync every 30 seconds
-    setInterval(fetchData, 30000);
+    // Auto-sync every 10 seconds (reduced for faster detection)
+    setInterval(fetchData, 10000);
 
 
     // Circular Progress Animation (Initial Placeholder removed, logic moved to fetch)
